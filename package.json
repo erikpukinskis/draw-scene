@@ -1,0 +1,9 @@
+{
+  "name": "draw-scene",
+  "version": "0.1.0",
+  "description": "paint 3d polygons onto a canvas",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/erikpukinskis/draw-scene.git"
+  }
+}
