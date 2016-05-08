@@ -1,4 +1,6 @@
-Paint polygons with colored verticies to a canvas:
+![screenshot of pink triangle and yellow square](http://i.imgur.com/Key14zv.png)
+
+Paint polygons with colored verticies to a canvas. DrawScene is under 200 lines and is written for clarity and hackability. It works well as a library, but it is also a solid foundation for building on. It is based on Learning WebGL lessons, [particularly Lesson 2](http://learningwebgl.com/blog/?p=134).
 
     var shapes = [
       {
