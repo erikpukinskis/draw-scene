@@ -2,85 +2,89 @@
 
 Paint polygons with colored verticies to a canvas. DrawScene is under 200 lines and is written for clarity and hackability. It works well as a library, but it is also a solid foundation for building on. It is based on Learning WebGL lessons, [particularly Lesson 2](http://learningwebgl.com/blog/?p=134).
 
-    var shapes = [
-      {
-        name: "triangle",
-        position: [-1.5, 0.0, -7.0],
-        verticies: [
-           0.0,  1.0,  0.0,
-          -1.0, -1.0,  0.0,
-           1.0, -1.0,  0.0
-        ],
-        pointCount: 3,
-        colors: [
-          1.0, 0.4, 0.6, 1.0,
-          0.9, 0.4, 0.7, 1.0,
-          0.8, 0.4, 0.9, 1.0
-        ]
-      },
-      {
-        name: "square",
-        position: [1.5, 0.0, -7.0],
-        verticies: [
-           1.0,  1.0,  0.0,
-          -1.0,  1.0,  0.0,
-           1.0, -1.0,  0.0,
-          -1.0, -1.0,  0.0
-        ],
-        pointCount: 4,
-        colors: [
-          1.0, 0.8, 0.2, 1.0,
-          0.9, 0.7, 0.4 , 1.0,
-          0.8, 0.7, 0.6, 1.0,
-          0.7, 0.6, 0.8, 1.0
-        ]
-      }
+```javascript
+var shapes = [
+  {
+    name: "triangle",
+    position: [-1.5, 0.0, -7.0],
+    verticies: [
+       0.0,  1.0,  0.0,
+      -1.0, -1.0,  0.0,
+       1.0, -1.0,  0.0
+    ],
+    pointCount: 3,
+    colors: [
+      1.0, 0.4, 0.6, 1.0,
+      0.9, 0.4, 0.7, 1.0,
+      0.8, 0.4, 0.9, 1.0
     ]
+  },
+  {
+    name: "square",
+    position: [1.5, 0.0, -7.0],
+    verticies: [
+       1.0,  1.0,  0.0,
+      -1.0,  1.0,  0.0,
+       1.0, -1.0,  0.0,
+      -1.0, -1.0,  0.0
+    ],
+    pointCount: 4,
+    colors: [
+      1.0, 0.8, 0.2, 1.0,
+      0.9, 0.7, 0.4 , 1.0,
+      0.8, 0.7, 0.6, 1.0,
+      0.7, 0.6, 0.8, 1.0
+    ]
+  }
+]
 
-    drawScene.buffer(shapes)
+drawScene.buffer(shapes)
 
-    var camera = {
-      fovy: 45,
-      near: 0.1,
-      far: 100.0,
-      pitch: 0.0,
-      yaw: 0.0,
-      xPos: 0.0,
-      yPos: 0.4,
-      zPos: 0.0  
-    }
+var camera = {
+  fovy: 45,
+  near: 0.1,
+  far: 100.0,
+  pitch: 0.0,
+  yaw: 0.0,
+  xPos: 0.0,
+  yPos: 0.4,
+  zPos: 0.0  
+}
 
-    drawScene(shapes, camera)
+drawScene(shapes, camera)
+```
 
 Requires you have a canvas and some shaders in your document:
 
-    <canvas style="border: none" width="300" height="300"></canvas>
+```html
+<canvas style="border: none" width="300" height="300"></canvas>
 
-    <script id="fill-shader" type="x-shader/x-fragment">
-        precision mediump float;
+<script id="fill-shader" type="x-shader/x-fragment">
+    precision mediump float;
 
-        varying vec4 vColor;
+    varying vec4 vColor;
 
-        void main(void) {
-            gl_FragColor = vColor;
-        }
-    </script>
+    void main(void) {
+        gl_FragColor = vColor;
+    }
+</script>
 
-    <script id="geometry-shader" type="x-shader/x-vertex">
-        attribute vec3 aVertexPosition;
-        attribute vec4 aVertexColor;
+<script id="geometry-shader" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec4 aVertexColor;
 
-        uniform mat4 uniformModelViewMatrix;
-        uniform mat4 uniformProjectionMatrix;
+    uniform mat4 uniformModelViewMatrix;
+    uniform mat4 uniformProjectionMatrix;
 
-        varying vec4 vColor;
+    varying vec4 vColor;
 
-        void main(void) {
-            gl_Position = uniformProjectionMatrix * uniformModelViewMatrix * vec4(aVertexPosition, 1.0);
-            vColor = aVertexColor;
-        }
-    </script>
+    void main(void) {
+        gl_Position = uniformProjectionMatrix * uniformModelViewMatrix * vec4(aVertexPosition, 1.0);
+        vColor = aVertexColor;
+    }
+</script>
 
-    <script src="draw-scene.js"></script>
+<script src="draw-scene.js"></script>
+```
 
-Check out demo.html.
+Check out [demo.html](demo.html).
