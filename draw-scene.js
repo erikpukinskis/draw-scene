@@ -35,16 +35,24 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
 var drawScene = (function() {
   var gl;
 
-  function initGL(canvas) {
+  function initGL() {
+    var canvas = document.querySelector("canvas");
+
     try {
       gl = canvas.getContext("experimental-webgl");
       gl.viewportWidth = canvas.width;
       gl.viewportHeight = canvas.height;
+
+      gl.clearColor(1.0, 1.0, 1.0, 1.0);
+      gl.enable(gl.DEPTH_TEST);
+
     } catch (e) {
     }
     if (!gl) {
       throw new Error("Could not initialise WebGL, sorry :-(");
     }
+
+    initShaders()
   }
 
   function getScriptContent(shaderScript) {
@@ -112,102 +120,109 @@ var drawScene = (function() {
     shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
     gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
 
-    shaderProgram.cameraMatrixUniform = gl.getUniformLocation(shaderProgram, "uniformCameraMatrix");
+    shaderProgram.projectionMatrixUniform = gl.getUniformLocation(shaderProgram, "uniformProjectionMatrix");
     shaderProgram.modelViewMatrixUniform = gl.getUniformLocation(shaderProgram, "uniformModelViewMatrix");
   }
 
 
   var modelViewMatrix = mat4.create();
-  var cameraMatrix = mat4.create();
+  var projectionMatrix = mat4.create();
 
   function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.cameraMatrixUniform, false, cameraMatrix);
+    gl.uniformMatrix4fv(shaderProgram.projectionMatrixUniform, false, projectionMatrix);
 
     gl.uniformMatrix4fv(shaderProgram.modelViewMatrixUniform, false, modelViewMatrix);
   }
 
 
+  var vertexPositionBuffer
+  var vertexColorBuffer
 
-  function setBufferSize(buffer, size, count) {
-    buffer.itemSize = size;
-    buffer.numItems = count;
+  function bufferScene(shapes) {
+
+    if (!gl) { initGL() }
+
+    var vertexCount = 0
+    var positions = []
+    var colors = []
+
+    for(var i=0; i<shapes.length; i++) {
+      var shape = shapes[i]
+
+      vertexCount += shape.pointCount
+
+      for(var j=0; j<shape.verticies.length; j++) {
+        positions.push(shape.verticies[j])
+      }
+
+      for(var j=0; j<shape.colors.length; j++) {
+        colors.push(shape.colors[j])
+      }
+    }
+
+    vertexPositionBuffer = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+    vertexPositionBuffer.itemSize = 3;
+    vertexPositionBuffer.numItems = vertexCount
+
+    vertexColorBuffer = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW)
+    vertexColorBuffer.itemSize = 4
+    vertexColorBuffer.numItems = vertexCount
   }
 
-  function bufferPosition(verticies, count) {
-    vertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.STATIC_DRAW);
-    setBufferSize(vertexPositionBuffer, 3, count)
-    return vertexPositionBuffer
+  var camera
+
+  function degToRad(degrees) {
+    return degrees * Math.PI / 180;
   }
 
-  function bufferColors(colors, count) {
+  function drawScene(shapes, cam) {
+    camera = cam
 
-    var vertexColorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+    if (!gl) { throw new Error("call drawScene.buffer(shapes) before calling drawScene()") }
 
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-    setBufferSize(vertexColorBuffer, 4, count)
-
-    return vertexColorBuffer
-  }
-
-
-
-
-  function drawShape(shape) {
-    var vertexPositionBuffer = bufferPosition(shape.verticies, shape.pointCount)
-
-    var vertexColorBuffer = bufferColors(shape.colors, shape.pointCount)
-
-    mat4.translate(modelViewMatrix, shape.position);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-    gl.vertexAttribPointer(
-      shaderProgram.vertexPositionAttribute,
-      vertexPositionBuffer.itemSize,
-      gl.FLOAT,
-      false,
-      0,
-      0
-    );
-
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
-
-    gl.vertexAttribPointer(
-      shaderProgram.vertexColorAttribute,
-      vertexColorBuffer.itemSize,
-      gl.FLOAT,
-      false,
-      0,
-      0
-    );
-
-    setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, shape.pointCount);
-  }
-
-  function drawScene(shapes) {
-
-    var canvas = document.querySelector("canvas");
-    initGL(canvas);
-    initShaders();
-
-    gl.clearColor(1.0, 1.0, 1.0, 1.0);
-    gl.enable(gl.DEPTH_TEST);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, cameraMatrix);
+    mat4.perspective(camera.fovy, gl.viewportWidth / gl.viewportHeight, camera.near, camera.far, projectionMatrix);
 
-    mat4.identity(modelViewMatrix);
+    var shapeStart = 0
 
     for(var i=0; i<shapes.length; i++) {
-      drawShape(shapes[i])
+      var shape = shapes[i]
+
+      mat4.identity(modelViewMatrix)
+
+      mat4.rotate(modelViewMatrix, degToRad(camera.pitch), [1, 0, 0])
+      mat4.rotate(modelViewMatrix, degToRad(camera.yaw), [0, 1, 0])
+      mat4.translate(modelViewMatrix, [camera.xPos, camera.yPos, camera.zPos])
+
+      mat4.translate(modelViewMatrix, shape.position);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer)
+      gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0)
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer)
+      gl.vertexAttribPointer(
+        shaderProgram.vertexColorAttribute, vertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
+
+      setMatrixUniforms()
+      gl.drawArrays(gl.TRIANGLE_STRIP, shapeStart, shape.pointCount)
+
+      shapeStart += shape.pointCount
+
     }
 
   }
 
+  drawScene.camera = camera
+
+  drawScene.buffer = bufferScene
+
   return drawScene
 })()
+
+
