@@ -179,10 +179,8 @@ var drawScene = (function() {
     return degrees * Math.PI / 180;
   }
 
-  function drawScene(shapes, cam) {
+  function paint(shapes, cam) {
     camera = cam
-
-    if (!gl) { throw new Error("call drawScene.buffer(shapes) before calling drawScene()") }
 
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -218,9 +216,17 @@ var drawScene = (function() {
 
   }
 
-  drawScene.camera = camera
+  var shapes
 
-  drawScene.buffer = bufferScene
+  function drawScene(newShapes, camera) {
+    shapes = newShapes
+    bufferScene(shapes)
+    paint(shapes, camera)
+  }
+
+  drawScene.again = function(camera) {
+    paint(shapes, camera)
+  }
 
   return drawScene
 })()

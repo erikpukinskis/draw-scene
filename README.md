@@ -38,20 +38,14 @@ var shapes = [
   }
 ]
 
-drawScene.buffer(shapes)
-
-var camera = {
-  fovy: 45,
-  near: 0.1,
-  far: 100.0,
-  pitch: 0.0,
-  yaw: 0.0,
-  xPos: 0.0,
-  yPos: 0.4,
-  zPos: 0.0  
-}
 
 drawScene(shapes, camera)
+```
+
+If you want to redraw without rebuffering:
+
+```javascript
+drawScene.again(camera)
 ```
 
 Requires you have a canvas and some shaders in your document:

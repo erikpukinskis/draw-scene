@@ -67,8 +67,6 @@ var shapes = [
   }
 ]
 
-drawScene.buffer(shapes)
-
 var camera = {
   fovy: 45,
   near: 0.1,
@@ -81,6 +79,10 @@ var camera = {
 }
 
 drawScene(shapes, camera)
+
+// If you want to redraw without rebuffering:
+
+drawScene.again(camera)
 
 </script>
 
