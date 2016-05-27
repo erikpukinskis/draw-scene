@@ -51,7 +51,7 @@ drawScene.again(camera)
 Requires you have a canvas and some shaders in your document:
 
 ```html
-<canvas style="border: none" width="300" height="300"></canvas>
+<canvas width="300" height="300"></canvas>
 
 <script id="fill-shader" type="x-shader/x-fragment">
     precision mediump float;
