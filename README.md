@@ -39,46 +39,44 @@ var shapes = [
 ]
 
 
-drawScene(shapes, camera)
+drawScene(shapes)
 ```
 
-If you want to redraw without rebuffering:
+If you want to redraw from a different angle without rebuffering:
 
 ```javascript
+var camera = {
+  fovy: 45,
+  near: 0.1,
+  far: 100.0,
+  pitch: 0.0,
+  yaw: 0.0,
+  xPos: 0.0,
+  yPos: 0.4,
+  zPos: 0.0  
+}
+
 drawScene.again(camera)
 ```
 
-Requires you have a canvas and some shaders in your document:
+When you want to buffer new data, just call drawScene again. You can provide a camera then too:
+
+```javasscript
+shapes.forEach(...)
+
+drawScene(shapes, camera)
+```
+
+Requires you have a single canvas in your document:
 
 ```html
 <canvas width="300" height="300"></canvas>
 
-<script id="fill-shader" type="x-shader/x-fragment">
-    precision mediump float;
-
-    varying vec4 vColor;
-
-    void main(void) {
-        gl_FragColor = vColor;
-    }
-</script>
-
-<script id="geometry-shader" type="x-shader/x-vertex">
-    attribute vec3 aVertexPosition;
-    attribute vec4 aVertexColor;
-
-    uniform mat4 uniformModelViewMatrix;
-    uniform mat4 uniformProjectionMatrix;
-
-    varying vec4 vColor;
-
-    void main(void) {
-        gl_Position = uniformProjectionMatrix * uniformModelViewMatrix * vec4(aVertexPosition, 1.0);
-        vColor = aVertexColor;
-    }
-</script>
-
 <script src="draw-scene.js"></script>
+
+<script>
+drawScene(...)
+</script>
 ```
 
 Check out [demo.html](demo.html).

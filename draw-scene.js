@@ -72,38 +72,62 @@ var drawScene = (function() {
     return str
   }
 
-  function getShader(gl, id) {
-    var shaderScript = document.getElementById(id);
-    var str = getScriptContent(shaderScript)
+  function compileFillShader(gl, lines) {
+    var shader = gl.createShader(gl.FRAGMENT_SHADER)
 
-    var shader;
-    if (shaderScript.type == "x-shader/x-fragment") {
-      shader = gl.createShader(gl.FRAGMENT_SHADER);
-    } else if (shaderScript.type == "x-shader/x-vertex") {
-      shader = gl.createShader(gl.VERTEX_SHADER);
-    } else {
-      return null;
+    return compileShader(gl, shader, lines)
+  }
+
+  function compileVertexShader(gl, lines) {
+    var shader = shader = gl.createShader(gl.VERTEX_SHADER)
+
+    return compileShader(gl, shader, lines)
+  }
+
+  function compileShader(gl, shader, lines) {
+
+    gl.shaderSource(shader, lines.join("\n"))
+    gl.compileShader(shader)
+
+    var status = gl.getShaderParameter(shader, gl.COMPILE_STATUS)
+
+    console.log(status)
+
+    if (!status) {
+        throw new Error(gl.getShaderInfoLog(shader))
+        return null
     }
 
-    gl.shaderSource(shader, str);
-    gl.compileShader(shader);
-
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        throw new Error(gl.getShaderInfoLog(shader));
-        return null;
-    }
-
-    return shader;
+    return shader
   }
 
 
   var shaderProgram;
 
   function initShaders() {
-    var fillShader = getShader(gl, "fill-shader");
-    var geometryShader = getShader(gl, "geometry-shader");
+
+    var fillShader = compileFillShader(gl, [
+      "precision mediump float;",
+      "varying vec4 vColor;",
+      "void main(void) {",
+      "    gl_FragColor = vColor;",
+      "}",
+    ])
+
+    var geometryShader = compileVertexShader(gl, [
+      "attribute vec3 aVertexPosition;",
+      "attribute vec4 aVertexColor;",
+      "uniform mat4 uniformModelViewMatrix;",
+      "uniform mat4 uniformProjectionMatrix;",
+      "varying vec4 vColor;",
+      "void main(void) {",
+      "    gl_Position = uniformProjectionMatrix * uniformModelViewMatrix * vec4(aVertexPosition, 1.0);",
+      "    vColor = aVertexColor;",
+      "}",
+    ])
 
     shaderProgram = gl.createProgram();
+
     gl.attachShader(shaderProgram, geometryShader);
     gl.attachShader(shaderProgram, fillShader);
     gl.linkProgram(shaderProgram);
