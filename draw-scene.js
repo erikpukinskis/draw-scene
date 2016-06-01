@@ -33,7 +33,7 @@ quat4.str=function(a){return"["+a[0]+", "+a[1]+", "+a[2]+", "+a[3]+"]"};
 
 
 var drawScene = (function() {
-  var gl;
+  var gl
 
   function initGL() {
     var canvas = document.querySelector("canvas")
@@ -54,23 +54,6 @@ var drawScene = (function() {
     }
 
     initShaders()
-  }
-
-  function getScriptContent(shaderScript) {
-
-    if (!shaderScript) {
-      return null;
-    }
-
-    var str = "";
-    var k = shaderScript.firstChild;
-    while (k) {
-      if (k.nodeType == 3) {
-        str += k.textContent;
-      }
-      k = k.nextSibling;
-    }
-    return str
   }
 
   function compileFillShader(gl, lines) {
@@ -152,13 +135,6 @@ var drawScene = (function() {
   var modelViewMatrix = mat4.create();
   var projectionMatrix = mat4.create();
 
-  function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.projectionMatrixUniform, false, projectionMatrix);
-
-    gl.uniformMatrix4fv(shaderProgram.modelViewMatrixUniform, false, modelViewMatrix);
-  }
-
-
   var vertexPositionBuffer
   var vertexColorBuffer
 
@@ -219,11 +195,9 @@ var drawScene = (function() {
       var shape = shapes[i]
 
       mat4.identity(modelViewMatrix)
-
       mat4.rotate(modelViewMatrix, degToRad(camera.pitch), [1, 0, 0])
       mat4.rotate(modelViewMatrix, degToRad(camera.yaw), [0, 1, 0])
       mat4.translate(modelViewMatrix, [camera.xPos, camera.yPos, camera.zPos])
-
       mat4.translate(modelViewMatrix, shape.position);
 
       gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer)
@@ -233,7 +207,10 @@ var drawScene = (function() {
       gl.vertexAttribPointer(
         shaderProgram.vertexColorAttribute, vertexColorBuffer.itemSize, gl.FLOAT, false, 0, 0)
 
-      setMatrixUniforms()
+      gl.uniformMatrix4fv(shaderProgram.projectionMatrixUniform, false, projectionMatrix);
+
+      gl.uniformMatrix4fv(shaderProgram.modelViewMatrixUniform, false, modelViewMatrix);
+
       gl.drawArrays(gl.TRIANGLE_STRIP, shapeStart, shape.pointCount)
 
       shapeStart += shape.pointCount
