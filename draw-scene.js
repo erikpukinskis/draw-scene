@@ -89,13 +89,12 @@ var drawScene = (function() {
     gl.shaderSource(shader, lines.join("\n"))
     gl.compileShader(shader)
 
-    var status = gl.getShaderParameter(shader, gl.COMPILE_STATUS)
+    var isCompiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS)
 
-    console.log(status)
-
-    if (!status) {
-        throw new Error(gl.getShaderInfoLog(shader))
-        return null
+    if (!isCompiled) {
+      throw new Error(
+        gl.getShaderInfoLog(shader))
+      return null
     }
 
     return shader
