@@ -36,20 +36,21 @@ var drawScene = (function() {
   var gl;
 
   function initGL() {
-    var canvas = document.querySelector("canvas");
+    var canvas = document.querySelector("canvas")
 
-    try {
-      gl = canvas.getContext("experimental-webgl");
-      gl.viewportWidth = canvas.width;
-      gl.viewportHeight = canvas.height;
-
-      gl.clearColor(1.0, 1.0, 1.0, 1.0);
-      gl.enable(gl.DEPTH_TEST);
-
-    } catch (e) {
+    if (!canvas) {
+      throw new Error("Add a canvas element to your document before calling drawScene")
     }
+
+    gl = canvas.getContext("experimental-webgl")
+    gl.viewportWidth = canvas.width
+    gl.viewportHeight = canvas.height
+
+    gl.clearColor(1.0, 1.0, 1.0, 1.0)
+    gl.enable(gl.DEPTH_TEST)
+
     if (!gl) {
-      throw new Error("Could not initialise WebGL, sorry :-(");
+      throw new Error("Could not initialize WebGL")
     }
 
     initShaders()
