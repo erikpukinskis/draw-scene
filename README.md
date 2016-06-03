@@ -2,6 +2,8 @@
 
 Paint polygons with colored verticies to a canvas. DrawScene is under 200 lines and is written for clarity and hackability. It works well as a library, but it is also a solid foundation for building on. It is based on Learning WebGL lessons, [particularly Lesson 2](http://learningwebgl.com/blog/?p=134).
 
+Requires [gl-matrix](http://glmatrix.net/).
+
 ```javascript
 var shapes = [
   {
@@ -71,6 +73,8 @@ Requires you have a single canvas in your document:
 
 ```html
 <canvas width="300" height="300"></canvas>
+
+<script src="gl-matrix.js"></script>
 
 <script src="draw-scene.js"></script>
 
